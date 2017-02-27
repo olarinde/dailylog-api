@@ -1,0 +1,201 @@
+#%RAML 0.8
+---
+title: "User Service Subscription API"
+version: v1
+baseUri: http://localhost:8080/usermgt/{version}/
+mediaType: application/json
+
+schemas:
+  - registration: |
+      {  "$schema": "http://json-schema.org/draft-03/schema",
+         "type": "object",
+          "properties": {
+           "userId": {"type": "string", "required": true},
+           "firstname": {"type": "string", "required": true},
+           "lastname": {"type": "string", "required": true},
+           "email": {"type": "string", "required": true},
+           "subscriptions": {"type": "array",
+                              "uniqueItems": true,
+                              "items": {"type": "object",
+                                "properties": {
+                                  "serviceType": {"type": "string", "required": true, "enum": ["curr_historic_rates", "curr_live_rates"]},
+                                  "currencyPairs": {"type": "array",
+                                                      "items": {"type": "string"},
+                                                      "minItems": 1,
+                                                      "uniqueItems": true
+                                  }
+                              }
+           }
+        }
+       }
+      }
+
+  - registrations: |
+      {  "$schema": "http://json-schema.org/draft-03/schema",
+         "type": "array",
+         "items": {
+            "type": "object",
+        "properties": {
+          "userId": {"type": "string", "required": true},
+          "firstname": {"type": "string", "required": true},
+          "lastname": {"type": "string", "required": true},
+          "email": {"type": "string", "required": true},
+          "subscriptions": {"type": "array",
+                              "uniqueItems": true,
+                              "items": {"type": "object",
+                                "properties": {
+                                  "serviceType": {"type": "string", "required": true, "enum": ["curr_historic_rates", "curr_live_rates"]},
+                                  "currencyPairs": {"type": "array",
+                                                      "items": {"type": "string"},
+                                                      "minItems": 1,
+                                                      "uniqueItems": true
+                                  }
+                              }
+        }
+        }
+        }
+      }
+      }
+  - newregistration: |
+      {  "$schema": "http://json-schema.org/draft-03/schema",
+         "type": "object",
+        "properties": {
+          "userId": {"type": "string", "required": true},
+          "firstname": {"type": "string", "required": true},
+          "lastname": {"type": "string", "required": true},
+          "email": {"type": "string", "required": true},
+          "subscriptions": {"type": "array",
+                              "uniqueItems": true,
+                              "items": {"type": "object",
+                                "properties": {
+                                  "serviceType": {"type": "string", "required": true, "enum": ["curr_historic_rates", "curr_live_rates"]},
+                                  "currencyPairs": {"type": "array",
+                                                      "items": {"type": "string"},
+                                                        "minItems": 1,
+                                                        "uniqueItems": true
+                                                       }
+                                  }
+                                }
+                              }
+          }
+       }
+
+  - partialregistration: |
+      { "$schema": "http://json-schema.org/draft-03/schema",
+        "type": "object",
+        "properties": {
+          "firstname": {"type": "string"},
+          "lastname": {"type": "string"},
+          "email": {"type": "string"},
+          "subscriptions": {"type": "array",
+                              "uniqueItems": true,
+                              "items": {"type": "object",
+                                "properties": {
+                                  "serviceType": {"type": "string", "required": true, "enum": ["curr_historic_rates", "curr_live_rates"]},
+                                  "currencyPairs": {"type": "array",
+                                                      "items": {"type": "string"},
+                                                        "minItems": 1,
+                                                        "uniqueItems": true
+                                                       }
+                                  }
+                                }
+                              }
+          }
+        }
+
+traits:
+  - secured:
+      displayName: secured
+      headers:
+        Authorization:
+          description: The auth token for this request
+      responses:
+        401:
+          description: Unauthorized
+  - additionalHeader:
+      displayName: additionalHeader
+      headers:
+        x-api-version:
+          required: true
+          description: The API implementation version
+          example: 1.3.75
+
+
+resourceTypes:
+  - baseResource:
+      is: [ additionalHeader ]
+  - collection:
+      type: baseResource
+      get:
+        responses:
+          200:
+            body:
+              application/json:
+                schema: <<resourcePathName>>
+                example: <<example-collection>>
+      post:
+        body:
+          schema: <<resourcePathName | !singularize>>
+          example: <<example-newmember>>
+        responses:
+          201:
+            headers:
+              location:
+                description: The URI to the newly created resource
+                example: http://localhost:7000/137
+
+  - member:
+      type: baseResource
+      get:
+        responses:
+          200:
+            body:
+              schema: registration
+              example: <<example-member>>
+      patch:
+        body:
+          schema: partialregistration
+          example: <<example-partialmember>>
+        responses:
+          200:
+            body:
+              schema: partialregistration
+              example: <<example-member>>
+      delete:
+        responses:
+          204:
+
+/registrations: &registrations
+  type:
+    collection:
+      example-collection: |
+        [
+          {
+            "userId": "43997495",
+            "firstname": "John",
+            "lastname": "Doe",
+            "email": "john.doe@test.hsbc.com",
+            "serviceType": "curr_live_rates"
+          },
+          {
+            "userId": "43997497",
+            "firstname": "Jane",
+            "lastname": "Doe",
+            "email": "jane.doe@test.hsbc.com",
+            "serviceType": "curr_historic_rates"
+          }
+        ]
+      example-newmember: |
+        {
+          "userId": "43997007",
+          "firstname": "John",
+          "lastname": "Smith",
+          "email": "john.smith@test.hsbc.com",
+          "serviceType": "curr_live_rates"
+        }
+
+  get:
+    queryParameters:
+      serviceType:
+        description: Filter registrations by type. Either curr_live_rates or curr_historic_rates type
+        required: false
