@@ -2,81 +2,34 @@
 ---
 title: "User Service Subscription API"
 version: v1
-baseUri: http://localhost:8080/usermgt/{version}/
+baseUri: http://localhost:8080/dailylog/{version}/
 mediaType: application/json
 
 schemas:
-  - registration: |
-      {  "$schema": "http://json-schema.org/draft-03/schema",
-         "type": "object",
-          "properties": {
-           "userId": {"type": "string", "required": true},
-           "firstname": {"type": "string", "required": true},
-           "lastname": {"type": "string", "required": true},
-           "email": {"type": "string", "required": true},
-           "subscriptions": {"type": "array",
-                              "uniqueItems": true,
-                              "items": {"type": "object",
-                                "properties": {
-                                  "serviceType": {"type": "string", "required": true, "enum": ["curr_historic_rates", "curr_live_rates"]},
-                                  "currencyPairs": {"type": "array",
-                                                      "items": {"type": "string"},
-                                                      "minItems": 1,
-                                                      "uniqueItems": true
-                                  }
-                              }
-           }
-        }
-       }
-      }
+  - errorMessage: !include schemas/errorMessage-schema.json
+  - subscription: !include schemas/subscription-schema.json
+  - registration: !include schemas/registration-schema.json
 
   - registrations: |
       {  "$schema": "http://json-schema.org/draft-03/schema",
-         "type": "array",
-         "items": {
-            "type": "object",
-        "properties": {
-          "userId": {"type": "string", "required": true},
-          "firstname": {"type": "string", "required": true},
-          "lastname": {"type": "string", "required": true},
-          "email": {"type": "string", "required": true},
-          "subscriptions": {"type": "array",
-                              "uniqueItems": true,
-                              "items": {"type": "object",
-                                "properties": {
-                                  "serviceType": {"type": "string", "required": true, "enum": ["curr_historic_rates", "curr_live_rates"]},
-                                  "currencyPairs": {"type": "array",
-                                                      "items": {"type": "string"},
-                                                      "minItems": 1,
-                                                      "uniqueItems": true
-                                  }
-                              }
-        }
-        }
-        }
-      }
+         "type": "object",
+         "properties": {
+           "size": {"type": "integer", "required": true},
+           "registrations": {
+             "type": "array",
+             "items": {"$ref": "registration"}
+           }
+         }
       }
   - newregistration: |
       {  "$schema": "http://json-schema.org/draft-03/schema",
          "type": "object",
-        "properties": {
-          "userId": {"type": "string", "required": true},
-          "firstname": {"type": "string", "required": true},
-          "lastname": {"type": "string", "required": true},
-          "email": {"type": "string", "required": true},
-          "subscriptions": {"type": "array",
-                              "uniqueItems": true,
-                              "items": {"type": "object",
-                                "properties": {
-                                  "serviceType": {"type": "string", "required": true, "enum": ["curr_historic_rates", "curr_live_rates"]},
-                                  "currencyPairs": {"type": "array",
-                                                      "items": {"type": "string"},
-                                                        "minItems": 1,
-                                                        "uniqueItems": true
-                                                       }
-                                  }
-                                }
-                              }
+         "properties": {
+           "userId": {"type": "string", "required": true},
+           "firstname": {"type": "string", "required": true},
+           "lastname": {"type": "string", "required": true},
+           "email": {"type": "string", "required": true},
+           "subscriptions": {"$ref": "subscription"}
           }
        }
 
@@ -87,21 +40,9 @@ schemas:
           "firstname": {"type": "string"},
           "lastname": {"type": "string"},
           "email": {"type": "string"},
-          "subscriptions": {"type": "array",
-                              "uniqueItems": true,
-                              "items": {"type": "object",
-                                "properties": {
-                                  "serviceType": {"type": "string", "required": true, "enum": ["curr_historic_rates", "curr_live_rates"]},
-                                  "currencyPairs": {"type": "array",
-                                                      "items": {"type": "string"},
-                                                        "minItems": 1,
-                                                        "uniqueItems": true
-                                                       }
-                                  }
-                                }
-                              }
-          }
+          "subscriptions": {"$ref": "subscription"}
         }
+      }
 
 traits:
   - secured:
@@ -133,16 +74,21 @@ resourceTypes:
               application/json:
                 schema: <<resourcePathName>>
                 example: <<example-collection>>
+          400:
+            body:
+              application/json:
+                schema: errorMessage
       post:
         body:
           schema: <<resourcePathName | !singularize>>
           example: <<example-newmember>>
         responses:
-          201:
-            headers:
-              location:
-                description: The URI to the newly created resource
-                example: http://localhost:7000/137
+          200:
+            description: Registration has been received
+          400:
+            body:
+              application/json:
+                schema: errorMessage
 
   - member:
       type: baseResource
@@ -169,30 +115,60 @@ resourceTypes:
   type:
     collection:
       example-collection: |
-        [
+        {
+          "size" : 2,
+          "registrations" : [
           {
-            "userId": "43997495",
-            "firstname": "John",
-            "lastname": "Doe",
-            "email": "john.doe@test.hsbc.com",
-            "serviceType": "curr_live_rates"
-          },
-          {
-            "userId": "43997497",
-            "firstname": "Jane",
-            "lastname": "Doe",
-            "email": "jane.doe@test.hsbc.com",
-            "serviceType": "curr_historic_rates"
-          }
-        ]
+            "userId" : "123",
+            "firstname" : "Jane",
+            "lastname" : "Doe",
+            "email" : "jane.doe@test.com",
+            "subscriptions" : {
+              "size" : 1,
+              "subscriptions" : [ {
+                "serviceType" : "curr_live_rates",
+                "currencyPairs" : [ "GBP", "USD" ]
+              } ]
+            }
+          }, {
+            "userId" : "345",
+            "firstname" : "Max",
+            "lastname" : "Mustermann",
+            "email" : "max.mustermann@test.com",
+            "subscriptions" : {
+              "size" : 1,
+              "subscriptions" : [ {
+                "serviceType" : "curr_live_rates",
+                "currencyPairs" : [ "GBP", "USD" ]
+              } ]
+            }
+          } ]
+        }
       example-newmember: |
         {
           "userId": "43997007",
           "firstname": "John",
           "lastname": "Smith",
           "email": "john.smith@test.hsbc.com",
-          "serviceType": "curr_live_rates"
+          "subscriptions" : [ {
+            "serviceType" : "curr_live_rates",
+            "currencyPairs" : [ "GBP", "USD" ]
+          } ]
         }
+        example-member: |
+          {
+            "userId" : "123",
+            "firstname" : "Jane",
+            "lastname" : "Doe",
+            "email" : "jane.doe@test.com",
+            "subscriptions" : {
+              "size" : 1,
+              "subscriptions" : [ {
+                "serviceType" : "curr_live_rates",
+                "currencyPairs" : [ "GBP", "USD" ]
+              } ]
+            }
+          }
 
   get:
     queryParameters:

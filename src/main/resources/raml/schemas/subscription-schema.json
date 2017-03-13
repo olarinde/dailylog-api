@@ -1,0 +1,35 @@
+{
+    "$schema": "http://json-schema.org/draft-03/schema",
+    "type": "object",
+    "properties": {
+        "size": {
+            "type": "integer",
+            "required": true
+        },
+        "subscriptions": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "type": "object",
+                "properties": {
+                    "serviceType": {
+                        "type": "string",
+                        "required": true,
+                        "enum": [
+                            "curr_historic_rates",
+                            "curr_live_rates"
+                        ]
+                    },
+                    "currencyPairs": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "minItems": 1,
+                        "uniqueItems": true
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,23 @@
+{
+    "$schema": "http://json-schema.org/draft-03/schema",
+    "type": "object",
+    "properties": {
+        "userId": {
+            "type": "string",
+            "required": true
+        },
+        "firstname": {
+            "type": "string",
+            "required": true
+        },
+        "lastname": {
+            "type": "string",
+            "required": true
+        },
+        "email": {
+            "type": "string",
+            "required": true
+        },
+        "subscriptions": {"$ref": "subscription"}
+    }
+}

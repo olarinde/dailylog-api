@@ -1,0 +1,16 @@
+traits:
+  - secured:
+      displayName: secured
+      headers:
+        Authorization:
+          description: The auth token for this request
+      responses:
+        401:
+          description: Unauthorized
+  - additionalHeader:
+      displayName: additionalHeader
+      headers:
+        x-api-version:
+          required: true
+          description: The API implementation version
+          example: 1.3.75

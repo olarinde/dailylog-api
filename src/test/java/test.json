@@ -1,0 +1,41 @@
+{
+    "size": 2,
+    "registrations": [
+        {
+            "userId": "123",
+            "firstname": "Jane",
+            "lastname": "Doe",
+            "email": "jane.doe@test.com",
+            "subscriptions": {
+                "size": 1,
+                "subscriptions": [
+                    {
+                        "serviceType": "curr_live_rates",
+                        "currencyPairs": [
+                            "GBP",
+                            "USD"
+                        ]
+                    }
+                ]
+            }
+        },
+        {
+            "userId": "345",
+            "firstname": "Max",
+            "lastname": "Mustermann",
+            "email": "max.mustermann@test.com",
+            "subscriptions": {
+                "size": 1,
+                "subscriptions": [
+                    {
+                        "serviceType": "curr_live_rates",
+                        "currencyPairs": [
+                            "GBP",
+                            "USD"
+                        ]
+                    }
+                ]
+            }
+        }
+    ]
+}
